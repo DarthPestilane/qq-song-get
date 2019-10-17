@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/darthpesitlane/qq-song-get/model"
-	"github.com/darthpesitlane/qq-song-get/request"
+	"github.com/DarthPestilane/qq-song-get/model"
+	"github.com/DarthPestilane/qq-song-get/request"
 	"net/http"
 	"sync"
 )

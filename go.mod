@@ -1,4 +1,4 @@
-module github.com/darthpesitlane/qq-song-get
+module github.com/DarthPestilane/qq-song-get
 
 go 1.13
 

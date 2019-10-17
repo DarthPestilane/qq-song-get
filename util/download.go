@@ -2,8 +2,8 @@ package util
 
 import (
 	"github.com/cheggaaa/pb"
-	"github.com/darthpesitlane/qq-song-get/api"
-	"github.com/darthpesitlane/qq-song-get/request"
+	"github.com/DarthPestilane/qq-song-get/api"
+	"github.com/DarthPestilane/qq-song-get/request"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"

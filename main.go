@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/darthpesitlane/qq-song-get/api"
-	"github.com/darthpesitlane/qq-song-get/logger"
-	"github.com/darthpesitlane/qq-song-get/util"
+	"github.com/DarthPestilane/qq-song-get/api"
+	"github.com/DarthPestilane/qq-song-get/logger"
+	"github.com/DarthPestilane/qq-song-get/util"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
