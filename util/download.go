@@ -11,6 +11,8 @@ import (
 	"sync"
 )
 
+const downloadPath = "downloads"
+
 // DownloadBatch 批量下载
 func DownloadBatch(mp3List []api.MP3) {
 	logrus.Info("begin download.")
@@ -51,10 +53,10 @@ func DownloadBatch(mp3List []api.MP3) {
 				return
 			}
 			body := bar.NewProxyReader(resp.Body)
-			if err := os.MkdirAll("downloads", os.ModePerm); err != nil {
+			if err := os.MkdirAll(downloadPath, os.ModePerm); err != nil {
 				logrus.Fatalf("mkdir failed: %v", err)
 			}
-			file, err := os.Create("downloads/" + fileName)
+			file, err := os.Create(downloadPath + string(os.PathSeparator) + fileName)
 			if err != nil {
 				logrus.Fatalf("create file failed: %v", err)
 			}
