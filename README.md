@@ -1,6 +1,26 @@
 ## 安装
 
+- 通过 go:
+
+```sh
+$ go get -u -v github.com/DarthPestilane/qq-song-get
+```
+
+- 通过 docker:
+
+TODO
+
 ## 使用
+
+- 通过本地脚本：
+
+```sh
+$ ./qq-song-get --color=off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html
+```
+
+- 通过 docker:
+
+TODO
 
 ## 致谢
 
