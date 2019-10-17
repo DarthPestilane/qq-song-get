@@ -8,7 +8,9 @@ $ go get -u -v github.com/DarthPestilane/qq-song-get
 
 - 通过 docker:
 
-TODO
+```sh
+$ docker pull darthminion/qq-song-get
+```
 
 ## 使用
 
@@ -20,7 +22,9 @@ $ ./qq-song-get --color=off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html
 
 - 通过 docker:
 
-TODO
+```sh
+$ docker run --rm -it -v `pwd`/downloads:/downloads darthminion/qq-song-get https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html
+```
 
 ## 致谢
 
