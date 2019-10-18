@@ -14,7 +14,7 @@ $ docker pull darthminion/qq-song-get
 
 ## 使用
 
-- 通过本地脚本：
+- 通过本地二进制文件：
 
 ```sh
 $ ./qq-song-get --color=off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html
