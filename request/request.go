@@ -32,9 +32,8 @@ func init() {
 	}
 }
 
-func chooseUserAgent() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return userAgentList[r.Intn(len(userAgentList))]
+func userAgent() string {
+	return userAgentList[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(userAgentList))]
 }
 
 // GET http GET 请求
@@ -76,7 +75,7 @@ func HEAD(url string, qs map[string]string, shouldPretend bool) (*http.Response,
 }
 
 func pretend(req *http.Request) {
-	req.Header.Set("User-Agent", chooseUserAgent())
+	req.Header.Set("User-Agent", userAgent())
 	req.Header.Set("Origin", "https://c.y.qq.com")
 	req.Header.Set("Referer", "https://c.y.qq.com")
 }
@@ -84,7 +83,8 @@ func pretend(req *http.Request) {
 // ParseResponse 解析http响应
 func ParseResponse(resp *http.Response, data interface{}) error {
 	buf := bytes.NewBuffer(nil)
-	_, _ = buf.ReadFrom(resp.Body)
-	// logrus.Debugf("response body: %s", buf)
+	if _, err := buf.ReadFrom(resp.Body); err != nil {
+		return fmt.Errorf("read response body failed: %v", err)
+	}
 	return json.Unmarshal(buf.Bytes(), data)
 }

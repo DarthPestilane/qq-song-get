@@ -50,24 +50,26 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 	// batch send request
 	for _, song := range songs {
 		param := map[string]interface{}{
-			"module": "vkey.GetVkeyServer",
-			"method": "CgiGetVkey",
-			"param": map[string]interface{}{
-				"guid":      guid,
-				"loginflag": 1,
-				"songmid":   []string{song.Mid},
-				"uin":       "0",
-				"platform":  "20",
+			"req0": map[string]interface{}{
+				"module": "vkey.GetVkeyServer",
+				"method": "CgiGetVkey",
+				"param": map[string]interface{}{
+					"guid":      guid,
+					"loginflag": 1,
+					"songmid":   []string{song.Mid},
+					"uin":       "0",
+					"platform":  "20",
+				},
 			},
 		}
-		enc, _ := json.Marshal(map[string]interface{}{"req0": param})
+		enc, _ := json.Marshal(param)
 		go func(song model.Song) {
+			defer wg.Done()
 			resp, err := request.GET(songURL, map[string]string{"data": string(enc)}, true)
 			respMap.Store(song.Mid, &respWrap{
 				Response: resp,
 				err:      err,
 			})
-			wg.Done()
 		}(song)
 	}
 	wg.Wait()

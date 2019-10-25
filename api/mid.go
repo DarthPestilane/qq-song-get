@@ -8,9 +8,9 @@ import (
 // FindMid 找到媒体ID
 func FindMid(url string) (typ, mid string, err error) {
 	re := regexp.MustCompile("/(song|album)/(\\w+)\\.html")
-	matched, ok := re.FindStringSubmatch(url), re.MatchString(url)
-	if !ok {
+	if !re.MatchString(url) {
 		return "", "", fmt.Errorf("invalid qq music address: %s", url)
 	}
+	matched := re.FindStringSubmatch(url)
 	return matched[1], matched[2], nil
 }

@@ -1,9 +1,9 @@
 package util
 
 import (
-	"github.com/cheggaaa/pb"
 	"github.com/DarthPestilane/qq-song-get/api"
 	"github.com/DarthPestilane/qq-song-get/request"
+	"github.com/cheggaaa/pb"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -16,27 +16,37 @@ const downloadPath = "downloads"
 // DownloadBatch 批量下载
 func DownloadBatch(mp3List []api.MP3) {
 	logrus.Info("begin download.")
+	logrus.Info("press Ctrl+C twice to exit.")
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(mp3List))
-
+	// initiate progress bars
 	bars := make([]*pb.ProgressBar, 0, len(mp3List))
 	for range mp3List {
 		bars = append(bars, pb.New(0))
 	}
-	pool := pb.NewPool(bars...)
-	if err := pool.Start(); err != nil {
+	progressPool := pb.NewPool(bars...)
+	if err := progressPool.Start(); err != nil {
 		logrus.Fatalf("start progress_bar pool failed: %v", err)
 	}
 
+	// create download directory first
+	if err := os.MkdirAll(downloadPath, os.ModePerm); err != nil {
+		logrus.Fatalf("mkdir failed: %v", err)
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(mp3List))
 	for i, mp3 := range mp3List {
 		i, mp3 := i, mp3
 		go func() {
 			defer wg.Done()
+
+			// prepare single progress bar
 			fileName := adjustFileName(mp3.Singer + "-" + mp3.Title + ".mp3")
-			bar := bars[i].Prefix(fileName + ":").SetUnits(pb.U_BYTES)
-			bar.Start()
-			defer bar.Finish()
+			bar := bars[i].Prefix(fileName + ":").SetUnits(pb.U_BYTES) // locate individual progress bar
+			bar.Start()                                                // progress bar start
+			defer bar.Finish()                                         // trigger bar.Finish() before wg.Done()
+
+			// send HEAD request only for content-length
 			headResp, err := request.HEAD(mp3.DownloadURL, nil, false)
 			if err != nil {
 				logrus.Errorf("request for %s failed: %v", fileName, err)
@@ -46,27 +56,28 @@ func DownloadBatch(mp3List []api.MP3) {
 				logrus.Errorf("request for '%s' failed: http status: %s", fileName, headResp.Status)
 				return
 			}
-			bar.SetTotal64(headResp.ContentLength)
+			bar.SetTotal64(headResp.ContentLength) // set progress bar's max length
+
+			// now download mp3!
 			resp, err := request.GET(mp3.DownloadURL, nil, false)
 			if err != nil {
 				logrus.Errorf("request for %s failed: %v", fileName, err)
 				return
 			}
-			body := bar.NewProxyReader(resp.Body)
-			if err := os.MkdirAll(downloadPath, os.ModePerm); err != nil {
-				logrus.Fatalf("mkdir failed: %v", err)
-			}
+
+			// handle response body and progress bar
 			file, err := os.Create(downloadPath + string(os.PathSeparator) + fileName)
 			if err != nil {
 				logrus.Fatalf("create file failed: %v", err)
 			}
-			if _, err := io.Copy(file, body); err != nil {
-				logrus.Fatalf("copy failed: %v", err)
+			if _, err := io.Copy(file, bar.NewProxyReader(resp.Body)); err != nil {
+				logrus.Fatalf("copy downloaded content failed: %v", err)
 			}
 		}()
 	}
 	wg.Wait()
-	if err := pool.Stop(); err != nil {
+
+	if err := progressPool.Stop(); err != nil {
 		logrus.Fatalf("stop progress_bar pool failed: %v", err)
 	}
 }

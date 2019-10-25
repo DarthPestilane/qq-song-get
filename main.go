@@ -1,18 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"github.com/DarthPestilane/qq-song-get/api"
 	"github.com/DarthPestilane/qq-song-get/logger"
 	"github.com/DarthPestilane/qq-song-get/util"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
+	"runtime"
+)
+
+// Some build tags
+// Should be passed from: go build -ldflags "-s -w -X main.Version=1.0.0 ..."
+var (
+	// Version represents the app version.
+	Version string = "0.0.0"
+
+	// BuildTime represents the time when the app built.
+	BuildTime string
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "qq song download"
-	app.Version = "1.0.0"
+	app.Version = fmt.Sprintf("%s; build at %s; build by %s", Version, BuildTime, runtime.Version())
 	app.UsageText = "./qq-song-get [options] url\n   example: ./qq-song-get --color off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
