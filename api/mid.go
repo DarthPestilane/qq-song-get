@@ -7,7 +7,7 @@ import (
 
 // FindTypeAndMid 找到类型媒体ID
 func FindTypeAndMid(url string) (typ, mid string, err error) {
-	re := regexp.MustCompile("/(song|album)/(\\w+)\\.html")
+	re := regexp.MustCompile(`/(song|album)/(\w+)\.html`)
 	if !re.MatchString(url) {
 		return "", "", fmt.Errorf("invalid qq music address: %s", url)
 	}

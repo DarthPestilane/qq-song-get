@@ -42,7 +42,7 @@ func GET(url string, qs map[string]string, shouldPretend bool) (*http.Response, 
 	if err != nil {
 		return nil, fmt.Errorf("build request failed: %v", err)
 	}
-	if qs != nil && len(qs) != 0 {
+	if len(qs) != 0 {
 		query := req.URL.Query()
 		for k, v := range qs {
 			query.Set(k, v)
@@ -61,7 +61,7 @@ func HEAD(url string, qs map[string]string, shouldPretend bool) (*http.Response,
 	if err != nil {
 		return nil, fmt.Errorf("build request failed: %v", err)
 	}
-	if qs != nil && len(qs) != 0 {
+	if len(qs) != 0 {
 		query := req.URL.Query()
 		for k, v := range qs {
 			query.Set(k, v)
