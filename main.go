@@ -66,6 +66,11 @@ func main() {
 			logrus.Fatalf("prepare failed: %v", err)
 		}
 
+		if 0 == len(mp3List) {
+			logrus.Warn("没有可下载的音乐")
+			return nil
+		}
+
 		// download now!
 		util.DownloadBatch(mp3List)
 		return nil

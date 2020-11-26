@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/DarthPestilane/qq-song-get/model"
 	"github.com/DarthPestilane/qq-song-get/request"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"sync"
 )
@@ -89,6 +90,11 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 			return nil, fmt.Errorf("request failed, code: %d", songURLResp.Code)
 		}
 		data := songURLResp.Req0.Data
+		purl := data.MidURLInfo[0].Purl
+		if purl == "" {
+			logrus.Errorf("%s 需要VIP", song.Title)
+			continue
+		}
 		mp3 := MP3{
 			Title:       song.Title,
 			Singer:      song.Singer[0].Name,
