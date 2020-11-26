@@ -5,8 +5,8 @@ import (
 	"regexp"
 )
 
-// FindMid 找到媒体ID
-func FindMid(url string) (typ, mid string, err error) {
+// FindTypeAndMid 找到类型媒体ID
+func FindTypeAndMid(url string) (typ, mid string, err error) {
 	re := regexp.MustCompile("/(song|album)/(\\w+)\\.html")
 	if !re.MatchString(url) {
 		return "", "", fmt.Errorf("invalid qq music address: %s", url)

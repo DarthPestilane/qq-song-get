@@ -7,6 +7,9 @@ import (
 )
 
 const (
+	typeSong  = "song"
+	typeAlbum = "album"
+
 	songInfoURL  = "https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?platform=yqq&format=json"
 	albumInfoURL = "https://c.y.qq.com/v8/fcg-bin/fcg_v8_album_detail_cp.fcg?newsong=1&platform=yqq&format=json"
 )
@@ -27,16 +30,16 @@ type (
 	}
 )
 
-// Info 根据媒体ID获取信息
+// Info 根据类型和媒体ID获取信息
 func Info(typ, mid string) ([]model.Song, error) {
 	switch typ {
-	case "song":
+	case typeSong:
 		song, err := infoSingleSong(mid)
 		if err != nil {
 			return nil, err
 		}
 		return []model.Song{*song}, nil
-	case "album":
+	case typeAlbum:
 		return infoAlbum(mid)
 	}
 	return nil, fmt.Errorf("invalid type: %s", typ)

@@ -49,7 +49,7 @@ func main() {
 		if url == "" {
 			logrus.Fatalf("url is required")
 		}
-		typ, mid, err := api.FindMid(url)
+		typ, mid, err := api.FindTypeAndMid(url)
 		if err != nil {
 			logrus.Fatalf("find mid failed: %v", err)
 		}
