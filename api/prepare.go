@@ -37,8 +37,9 @@ type (
 	}
 
 	respWrap struct {
-		*http.Response
-		err error
+		resp     *http.Response
+		respBody []byte
+		err      error
 	}
 )
 
@@ -66,9 +67,10 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 		enc, _ := json.Marshal(param)
 		go func(song model.Song) {
 			defer wg.Done()
-			resp, err := request.GET(songURL, map[string]string{"data": string(enc)}, true)
+			resp, respBody, err := request.DefaultClient.Get(songURL, map[string]string{"data": string(enc)}, true)
 			respMap.Store(song.Mid, &respWrap{
-				Response: resp,
+				resp:     resp,
+				respBody: respBody,
 				err:      err,
 			})
 		}(song)
@@ -83,7 +85,7 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 			return nil, fmt.Errorf("request song url failed: %v", err)
 		}
 		var songURLResp SongURLResponse
-		if err := request.ParseResponse(wrap.Response, &songURLResp); err != nil {
+		if err := json.Unmarshal(wrap.respBody, &songURLResp); err != nil {
 			return nil, fmt.Errorf("parse song url response failed: %v", err)
 		}
 		if songURLResp.Code != 0 {

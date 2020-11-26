@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/DarthPestilane/qq-song-get/model"
 	"github.com/DarthPestilane/qq-song-get/request"
@@ -46,12 +47,12 @@ func Info(typ, mid string) ([]model.Song, error) {
 }
 
 func infoSingleSong(mid string) (*model.Song, error) {
-	resp, err := request.GET(songInfoURL, map[string]string{"songmid": mid}, true)
+	_, respBody, err := request.DefaultClient.Get(songInfoURL, map[string]string{"songmid": mid}, true)
 	if err != nil {
 		return nil, fmt.Errorf("request for song info failed: %v", err)
 	}
 	var songInfoResp SongInfoResponse
-	if err := request.ParseResponse(resp, &songInfoResp); err != nil {
+	if err := json.Unmarshal(respBody, &songInfoResp); err != nil {
 		return nil, fmt.Errorf("parse song info failed: %v", err)
 	}
 	if songInfoResp.Code != 0 {
@@ -61,12 +62,12 @@ func infoSingleSong(mid string) (*model.Song, error) {
 }
 
 func infoAlbum(mid string) ([]model.Song, error) {
-	resp, err := request.GET(albumInfoURL, map[string]string{"albummid": mid}, true)
+	_, respBody, err := request.DefaultClient.Get(albumInfoURL, map[string]string{"albummid": mid}, true)
 	if err != nil {
 		return nil, fmt.Errorf("request for song info failed: %v", err)
 	}
 	var albumResp AlbumResponse
-	if err := request.ParseResponse(resp, &albumResp); err != nil {
+	if err := json.Unmarshal(respBody, &albumResp); err != nil {
 		return nil, fmt.Errorf("parse song info failed: %v", err)
 	}
 	if albumResp.Code != 0 {

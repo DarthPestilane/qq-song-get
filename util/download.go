@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"github.com/DarthPestilane/qq-song-get/api"
 	"github.com/DarthPestilane/qq-song-get/request"
 	"github.com/cheggaaa/pb"
@@ -47,7 +48,7 @@ func DownloadBatch(mp3List []api.MP3) {
 			defer bar.Finish()                                         // trigger bar.Finish() before wg.Done()
 
 			// send HEAD request only for content-length
-			headResp, err := request.HEAD(mp3.DownloadURL, nil, false)
+			headResp, _, err := request.DefaultClient.Head(mp3.DownloadURL, nil, false)
 			if err != nil {
 				logrus.Errorf("request for %s failed: %v", fileName, err)
 				return
@@ -59,7 +60,7 @@ func DownloadBatch(mp3List []api.MP3) {
 			bar.SetTotal64(headResp.ContentLength) // set progress bar's max length
 
 			// now download mp3!
-			resp, err := request.GET(mp3.DownloadURL, nil, false)
+			_, respBody, err := request.DefaultClient.Get(mp3.DownloadURL, nil, false)
 			if err != nil {
 				logrus.Errorf("request for %s failed: %v", fileName, err)
 				return
@@ -70,7 +71,7 @@ func DownloadBatch(mp3List []api.MP3) {
 			if err != nil {
 				logrus.Fatalf("create file failed: %v", err)
 			}
-			if _, err := io.Copy(file, bar.NewProxyReader(resp.Body)); err != nil {
+			if _, err := io.Copy(file, bar.NewProxyReader(bytes.NewReader(respBody))); err != nil {
 				logrus.Fatalf("copy downloaded content failed: %v", err)
 			}
 		}()

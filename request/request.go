@@ -2,7 +2,6 @@ package request
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 
 var (
 	userAgentList []string
+	DefaultClient IClient = &Client{}
 )
 
 func init() {
@@ -32,15 +32,18 @@ func init() {
 	}
 }
 
-func userAgent() string {
-	return userAgentList[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(userAgentList))]
+type IClient interface {
+	Get(url string, qs map[string]string, shouldPretend bool) (resp *http.Response, body []byte, err error)
+	Head(url string, qs map[string]string, shouldPretend bool) (resp *http.Response, body []byte, err error)
 }
 
-// GET http GET 请求
-func GET(url string, qs map[string]string, shouldPretend bool) (*http.Response, error) {
+type Client struct {
+}
+
+func (c *Client) Get(url string, qs map[string]string, shouldPretend bool) (*http.Response, []byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("build request failed: %v", err)
+		return nil, nil, fmt.Errorf("build request failed: %v", err)
 	}
 	if len(qs) != 0 {
 		query := req.URL.Query()
@@ -52,14 +55,13 @@ func GET(url string, qs map[string]string, shouldPretend bool) (*http.Response, 
 	if shouldPretend {
 		pretend(req)
 	}
-	return http.DefaultClient.Do(req)
+	return sendAndGetBody(req)
 }
 
-// HEAD http HEAD 请求
-func HEAD(url string, qs map[string]string, shouldPretend bool) (*http.Response, error) {
+func (c *Client) Head(url string, qs map[string]string, shouldPretend bool) (*http.Response, []byte, error) {
 	req, err := http.NewRequest(http.MethodHead, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("build request failed: %v", err)
+		return nil, nil, fmt.Errorf("build request failed: %v", err)
 	}
 	if len(qs) != 0 {
 		query := req.URL.Query()
@@ -71,7 +73,11 @@ func HEAD(url string, qs map[string]string, shouldPretend bool) (*http.Response,
 	if shouldPretend {
 		pretend(req)
 	}
-	return http.DefaultClient.Do(req)
+	return sendAndGetBody(req)
+}
+
+func userAgent() string {
+	return userAgentList[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(userAgentList))]
 }
 
 func pretend(req *http.Request) {
@@ -80,11 +86,14 @@ func pretend(req *http.Request) {
 	req.Header.Set("Referer", "https://c.y.qq.com")
 }
 
-// ParseResponse 解析http响应
-func ParseResponse(resp *http.Response, data interface{}) error {
+func sendAndGetBody(req *http.Request) (*http.Response, []byte, error) {
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, nil, fmt.Errorf("do request failed: %s", err)
+	}
 	buf := bytes.NewBuffer(nil)
 	if _, err := buf.ReadFrom(resp.Body); err != nil {
-		return fmt.Errorf("read response body failed: %v", err)
+		return nil, nil, fmt.Errorf("read response body failed: %v", err)
 	}
-	return json.Unmarshal(buf.Bytes(), data)
+	return resp, buf.Bytes(), nil
 }

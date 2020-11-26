@@ -1,3 +1,5 @@
+.PHONY: all test clean
+
 args = -ldflags='-s -w' -o qq-song-get
 
 build:
@@ -11,6 +13,11 @@ release:
 
 lint: # 代码风格检查
 	golangci-lint run --concurrency=2
+
+test:
+	go test ./... -count=1
+
+spec: lint test
 
 tidy:
 	go mod tidy
