@@ -16,6 +16,9 @@ const downloadPath = "downloads"
 
 // DownloadBatch 批量下载
 func DownloadBatch(mp3List []api.MP3) {
+	if 0 == len(mp3List) {
+		return
+	}
 	logrus.Info("begin download.")
 	logrus.Info("press Ctrl+C twice to exit.")
 

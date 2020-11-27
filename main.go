@@ -15,7 +15,7 @@ import (
 // Should be passed from: go build -ldflags "-s -w -X main.Version=1.0.0 ..."
 var (
 	// Version represents the app version.
-	Version string = "0.0.0"
+	Version = "0.0.0"
 
 	// BuildTime represents the time when the app built.
 	BuildTime string
