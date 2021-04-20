@@ -15,7 +15,7 @@ const (
 	gray   = 37
 )
 
-var defaultFormatter = &Formatter{}
+var _ logrus.Formatter = &Formatter{}
 
 // Formatter formats logs
 type Formatter struct {

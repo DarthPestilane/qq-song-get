@@ -6,7 +6,7 @@ import (
 	"github.com/DarthPestilane/qq-song-get/logger"
 	"github.com/DarthPestilane/qq-song-get/util"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/spf13/cobra"
 	"os"
 	"runtime"
 )
@@ -22,69 +22,55 @@ var (
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "qq-song-get"
-	app.Version = fmt.Sprintf("%s; build at %s; build by %s", Version, BuildTime, runtime.Version())
-	app.UsageText = "./qq-song-get [options] url\n   example: ./qq-song-get --color off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html"
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "color",
-			Value: "on",
-			Usage: "Display color output. Accept `on` and off",
-		},
-		cli.BoolFlag{
-			Name:  "debug",
-			Usage: "Print debug logs",
-		},
-	}
-	app.Action = func(ctx *cli.Context) error {
-		// show help txt when there are no args
-		if ctx.NArg() == 0 {
-			return cli.ShowAppHelp(ctx)
+	cmd := &cobra.Command{}
+	cmd.Use = "qq-song-get"
+	cmd.Long = "./qq-song-get [options] url \n\n example: ./qq-song-get --color=off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html"
+	cmd.Version = fmt.Sprintf("%s; build at %s; build by %s", Version, BuildTime, runtime.Version())
+	cmd.Args = cobra.MaximumNArgs(1)
+	colorFlag := cmd.Flags().String("color", "on", "Display colorful output. Accept `on` and off")
+	debugFlag := cmd.Flags().Bool("debug", false, "Print Set log level to 'debug' to print debug logs")
+	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return cmd.Help()
 		}
-
-		// determine color output
-		if ctx.String("color") == "off" {
+		if colorFlag != nil && *colorFlag == "off" {
 			logger.SetFormatter(&logger.Formatter{DisableColor: true})
 		}
-
-		// determine log level
-		if ctx.Bool("debug") {
+		if debugFlag != nil && *debugFlag {
 			logger.SetLevel(logrus.DebugLevel)
 		}
+		return proceed(args[0])
+	}
 
-		// here we start!
-		url := ctx.Args().Get(0)
-		if url == "" {
-			logrus.Fatalf("url is required")
-		}
-		typ, mid, err := api.FindTypeAndMid(url)
-		if err != nil {
-			logrus.Fatalf("find mid failed: %v", err)
-		}
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
+}
 
-		// fetch song info from single song or album
-		songs, err := api.Info(typ, mid)
-		if err != nil {
-			logrus.Fatalf("fetch media info failed: %v", err)
-		}
+func proceed(url string) error {
+	typ, mid, err := api.FindTypeAndMid(url)
+	if err != nil {
+		return fmt.Errorf("find mid failed: %w", err)
+	}
 
-		// prepare to download
-		mp3List, err := api.Prepare(songs)
-		if err != nil {
-			logrus.Fatalf("prepare failed: %v", err)
-		}
+	// fetch song info from single song or album
+	songs, err := api.Info(typ, mid)
+	if err != nil {
+		return fmt.Errorf("fetch media info failed: %w", err)
+	}
 
-		if 0 == len(mp3List) {
-			logrus.Warn("没有可下载的音乐")
-			return nil
-		}
+	// prepare to download
+	mp3List, err := api.Prepare(songs)
+	if err != nil {
+		return fmt.Errorf("prepare failed: %w", err)
+	}
 
-		// download now!
-		util.DownloadBatch(mp3List)
+	if 0 == len(mp3List) {
+		logrus.Warn("没有可下载的音乐")
 		return nil
 	}
-	if err := app.Run(os.Args); err != nil {
-		logrus.Fatalf("start app failed: %v", err)
-	}
+
+	// download now!
+	util.DownloadBatch(mp3List)
+	return nil
 }

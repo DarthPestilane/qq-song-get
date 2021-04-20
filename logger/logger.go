@@ -6,7 +6,7 @@ import (
 
 func init() {
 	logrus.SetLevel(logrus.InfoLevel)
-	logrus.SetFormatter(defaultFormatter)
+	logrus.SetFormatter(&Formatter{})
 }
 
 // SetFormatter override the default formatter set before
@@ -14,6 +14,6 @@ func SetFormatter(formatter logrus.Formatter) {
 	logrus.SetFormatter(formatter)
 }
 
-func SetLevel (level logrus.Level) {
+func SetLevel(level logrus.Level) {
 	logrus.SetLevel(level)
 }
