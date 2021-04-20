@@ -23,7 +23,7 @@ var (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "qq song download"
+	app.Name = "qq-song-get"
 	app.Version = fmt.Sprintf("%s; build at %s; build by %s", Version, BuildTime, runtime.Version())
 	app.UsageText = "./qq-song-get [options] url\n   example: ./qq-song-get --color off https://y.qq.com/n/yqq/album/000dilOO3JYIr4.html"
 	app.Flags = []cli.Flag{
@@ -31,6 +31,10 @@ func main() {
 			Name:  "color",
 			Value: "on",
 			Usage: "Display color output. Accept `on` and off",
+		},
+		cli.BoolFlag{
+			Name:  "debug",
+			Usage: "Print debug logs",
 		},
 	}
 	app.Action = func(ctx *cli.Context) error {
@@ -42,6 +46,11 @@ func main() {
 		// determine color output
 		if ctx.String("color") == "off" {
 			logger.SetFormatter(&logger.Formatter{DisableColor: true})
+		}
+
+		// determine log level
+		if ctx.Bool("debug") {
+			logger.SetLevel(logrus.DebugLevel)
 		}
 
 		// here we start!

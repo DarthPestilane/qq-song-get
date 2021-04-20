@@ -94,7 +94,7 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 		data := songURLResp.Req0.Data
 		purl := data.MidURLInfo[0].Purl
 		if purl == "" {
-			logrus.Errorf("%s 需要VIP", song.Title)
+			logrus.Errorf("%s 需要VIP或仅支持客户端播放", song.Title)
 			continue
 		}
 		mp3 := MP3{
