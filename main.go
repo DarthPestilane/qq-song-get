@@ -48,7 +48,7 @@ func main() {
 }
 
 func proceed(url string) error {
-	typ, mid, err := api.FindTypeAndMid(url)
+	typ, mid, err := util.ExtractTypeAndMid(url)
 	if err != nil {
 		return fmt.Errorf("find mid failed: %w", err)
 	}

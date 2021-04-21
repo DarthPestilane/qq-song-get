@@ -1,4 +1,4 @@
-package api
+package util
 
 import (
 	"fmt"
@@ -10,29 +10,29 @@ func TestFindTypeAndMid(t *testing.T) {
 	t.Run("when url is invalid", func(t *testing.T) {
 		url := "http://invalid.com"
 		t.Run("it should return error", func(t *testing.T) {
-			typ, mid, err := FindTypeAndMid(url)
+			typ, mid, err := ExtractTypeAndMid(url)
 			assert.NotNil(t, err)
 			assert.Zero(t, typ)
 			assert.Zero(t, mid)
 		})
 	})
 	t.Run("when url is a single song", func(t *testing.T) {
-		expectType := typeSong
+		expectType := "song"
 		expectMid := "test"
 		url := fmt.Sprintf("https://y.qq.com/n/yqq/%s/%s.html", expectType, expectMid)
 		t.Run("it should return without error", func(t *testing.T) {
-			typ, mid, err := FindTypeAndMid(url)
+			typ, mid, err := ExtractTypeAndMid(url)
 			assert.NoError(t, err)
 			assert.Equal(t, expectType, typ)
 			assert.Equal(t, expectMid, mid)
 		})
 	})
 	t.Run("when url is an album", func(t *testing.T) {
-		expectType := typeAlbum
+		expectType := "album"
 		expectMid := "test"
 		url := fmt.Sprintf("https://y.qq.com/n/yqq/%s/%s.html", expectType, expectMid)
 		t.Run("it should return without error", func(t *testing.T) {
-			typ, mid, err := FindTypeAndMid(url)
+			typ, mid, err := ExtractTypeAndMid(url)
 			assert.NoError(t, err)
 			assert.Equal(t, expectType, typ)
 			assert.Equal(t, expectMid, mid)
