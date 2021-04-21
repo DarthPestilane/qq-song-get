@@ -12,8 +12,14 @@ import (
 
 const (
 	songURL     = "https://u.y.qq.com/cgi-bin/musicu.fcg"
-	guid        = "1"
 	downloadURL = "http://ws.stream.qqmusic.qq.com/%s"
+
+	reqModule    = "vkey.GetVkeyServer"
+	reqMethod    = "CgiGetVkey"
+	reqGuid      = "1"
+	reqLoginFlag = 1
+	reqUin       = "0"
+	reqPlatform  = "20"
 )
 
 type (
@@ -53,14 +59,14 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 	for _, song := range songs {
 		param := map[string]interface{}{
 			"req0": map[string]interface{}{
-				"module": "vkey.GetVkeyServer",
-				"method": "CgiGetVkey",
+				"module": reqModule,
+				"method": reqMethod,
 				"param": map[string]interface{}{
-					"guid":      guid,
-					"loginflag": 1,
+					"guid":      reqGuid,
+					"loginflag": reqLoginFlag,
 					"songmid":   []string{song.Mid},
-					"uin":       "0",
-					"platform":  "20",
+					"uin":       reqUin,
+					"platform":  reqPlatform,
 				},
 			},
 		}
@@ -91,8 +97,7 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 		if songURLResp.Code != 0 {
 			return nil, fmt.Errorf("request failed, code: %d", songURLResp.Code)
 		}
-		data := songURLResp.Req0.Data
-		purl := data.MidURLInfo[0].Purl
+		purl := songURLResp.Req0.Data.MidURLInfo[0].Purl
 		if purl == "" {
 			logrus.Errorf("%s 需要VIP或仅支持客户端播放", song.Title)
 			continue
@@ -100,7 +105,7 @@ func Prepare(songs []model.Song) ([]MP3, error) {
 		mp3 := MP3{
 			Title:       song.Title,
 			Singer:      song.Singer[0].Name,
-			DownloadURL: fmt.Sprintf(downloadURL, data.MidURLInfo[0].Purl),
+			DownloadURL: fmt.Sprintf(downloadURL, purl),
 		}
 		mp3List = append(mp3List, mp3)
 	}

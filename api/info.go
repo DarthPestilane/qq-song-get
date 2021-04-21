@@ -35,18 +35,18 @@ type (
 func Info(typ, mid string) ([]model.Song, error) {
 	switch typ {
 	case typeSong:
-		song, err := infoSingleSong(mid)
+		song, err := fetchSingleSongInfo(mid)
 		if err != nil {
 			return nil, err
 		}
 		return []model.Song{*song}, nil
 	case typeAlbum:
-		return infoAlbum(mid)
+		return fetchAlbumInfo(mid)
 	}
 	return nil, fmt.Errorf("invalid type: %s", typ)
 }
 
-func infoSingleSong(mid string) (*model.Song, error) {
+func fetchSingleSongInfo(mid string) (*model.Song, error) {
 	_, respBody, err := request.DefaultClient.Get(songInfoURL, map[string]string{"songmid": mid}, true)
 	if err != nil {
 		return nil, fmt.Errorf("request for song info failed: %v", err)
@@ -61,7 +61,7 @@ func infoSingleSong(mid string) (*model.Song, error) {
 	return &songInfoResp.Data[0], nil
 }
 
-func infoAlbum(mid string) ([]model.Song, error) {
+func fetchAlbumInfo(mid string) ([]model.Song, error) {
 	_, respBody, err := request.DefaultClient.Get(albumInfoURL, map[string]string{"albummid": mid}, true)
 	if err != nil {
 		return nil, fmt.Errorf("request for song info failed: %v", err)
